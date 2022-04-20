@@ -27,8 +27,12 @@
 
 <template name="home">
   <h1>Movies List</h1>
-  {{#each movies}}
-  <h3>{{title}}</h3>
-  <li>{{overview}}</li>
+  {{#each movie in movies}}
+  <div class="movie-container">
+    <h3>{{ movie.title }}</h3>
+    <img src="{{ .. config.images.base_url }}/w500{{ movie.poster_path }}">
+    <li>{{ movie.overview }}</li>
+    <button class="like-button" data-movieId="{{movie.id}}">Liker</button>
+  </div>
   {{/each }}
 </template>

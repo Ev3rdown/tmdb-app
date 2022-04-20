@@ -27,15 +27,37 @@ Template.hello.events({
 Template.home.onCreated(function homeOnCreated() {
   let ctrl = this;
   this.movies = new ReactiveVar();
+  this.config = new ReactiveVar();
+  fetch('https://api.themoviedb.org/3/configuration?api_key='+keyJson.tmdb+'&language=fr-FR').then(res=>{
+    res.json().then(json=>{
+      ctrl.config.set(json.results);
+    })
+  });
   fetch('https://api.themoviedb.org/3/discover/movie?api_key='+keyJson.tmdb+'&language=fr-FR').then(res=>{
     res.json().then(json=>{
       ctrl.movies.set(json.results);
     })
-  })
+  });
+});
+
+Template.home.events({
+  'click .like-button'(event, instance) {
+    // increment the counter when button is clicked
+    //instance.counter.set(instance.counter.get() + 1);
+    console.log(event.currentTarget.dataset.movieid);
+    fetch('https://api.themoviedb.org/3/discover/movie?api_key='+keyJson.tmdb+'&language=fr-FR').then(res=>{
+      res.json().then(json=>{
+        ctrl.movies.set(json.results);
+      })
+    });
+  },
 });
 
 Template.home.helpers({
   movies() {
     return Template.instance().movies.get();
+  },
+  config(){
+    return Template.instance().config.get();
   }
 });
