@@ -1,6 +1,7 @@
 import { Template } from 'meteor/templating';
 import { ReactiveVar } from 'meteor/reactive-var';
-var HTTP = require('http');
+import { fetch } from "meteor/fetch"
+let keyJson = require('.keys.json');
 
 
 import './main.html';
@@ -23,18 +24,18 @@ Template.hello.events({
   },
 });
 
-/* Template.home.onCreated(function homeOnCreated() {
+Template.home.onCreated(function homeOnCreated() {
   let ctrl = this;
   this.movies = new ReactiveVar();
-  HTTP.call('GET', 'http://localhost:3000/api/discover/movie', {},
-    function (error, response) {
-      // Handle the error or response here.
-      ctrl.movies.set(JSON.parse(response.content).results)
-    });
+  fetch('https://api.themoviedb.org/3/discover/movie?api_key='+keyJson.tmdb+'&language=fr-FR').then(res=>{
+    res.json().then(json=>{
+      ctrl.movies.set(json.results);
+    })
+  })
 });
 
 Template.home.helpers({
   movies() {
     return Template.instance().movies.get();
   }
-}); */
+});
