@@ -30,7 +30,7 @@
   {{#each movie in movies}}
   <div class="movie-container">
     <h3>{{ movie.title }}</h3>
-    <img src="{{ .. config.images.base_url }}/w500{{ movie.poster_path }}">
+    <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}">
     <li>{{ movie.overview }}</li>
     <button class="like-button" data-movieId="{{movie.id}}">Liker</button>
   </div>
