@@ -45,11 +45,6 @@ Template.home.events({
     // increment the counter when button is clicked
     //instance.counter.set(instance.counter.get() + 1);
     console.log(event.currentTarget.dataset.movieid);
-    fetch('https://api.themoviedb.org/3/discover/movie?api_key='+keyJson.tmdb+'&language=fr-FR').then(res=>{
-      res.json().then(json=>{
-        ctrl.movies.set(json.results);
-      })
-    });
   },
 });
 
