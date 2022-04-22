@@ -35,34 +35,25 @@ Router.route('/api/movies/discover', async function () {
   var res = this.response;
 
   const movies = await mdb.discover.movie();
-  console.log(movies);
   movies.data.results.forEach(movie => {
     var mo = moviesLikes.findOne({ movieId: movie.id });
-    console.log(mo);
-    if (mo) {
-      movie.likes=mo.likes;
-    } else {
-      movie.likes=0;
-    }
+    movie.likes=0;
+    if(mo) movie.likes=mo.likes;
   });
   res.writeHead(200);
   res.end(JSON.stringify(movies.data));
-
 }, {where: 'server'});
 
-Router.route('/api/movies/like/:_id', async function () {
+Router.route('/api/movies/like/:_id', function () {
   /** @type {ClientRequest} */
   var req = this.request;
   /** @type {ServerResponse} */
   var res = this.response;
 
-  var params = this.params; // { _id: "5" }
+  var params = this.params;
   var id = parseInt(params._id);
 
   var up = moviesLikes.update({ movieId: id }, {$inc: { likes: 1 }},{ upsert: true });
-  var mo = moviesLikes.findOne({ movieId: id });
-  console.log(mo);
   res.writeHead(200);
-  res.end(JSON.stringify(mo));
-
+  res.end(JSON.stringify({success: (up==1?true:false)}));
 }, {where: 'server'});
