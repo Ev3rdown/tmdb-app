@@ -95,3 +95,5 @@ Router.route('/api/movies/details/:_id', async function () {
 //https://www.npmjs.com/package/node-themoviedb#common-usage-of-methods
 //https://guide.meteor.com/collections.html#schemas
 //file:///D:/EPSI/Cours%20Services%20Web/web-services-v2.pdf
+
+//http://meteortips.com/second-meteor-tutorial
