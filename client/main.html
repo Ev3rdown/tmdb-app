@@ -1,27 +1,33 @@
-<head>
+<!-- <head>
   <title>tmdb-app</title>
 </head>
 
 <body>
   <h1>Welcome to Meteor!</h1>
-
-  {{> hello}}
   {{> info}}
   {{> home}}
-</body>
-
-<template name="hello">
-  <button>Click Me</button>
-  <p>You've pressed the button {{counter}} times.</p>
+</body> -->
+<template name="main">
+  <nav class="navbar" style="display: flex; align-items: center;">
+    <h1 style="margin-right: 15px;">Tmdb-app</h1>
+    <br>
+    <a href="/">Home</a>
+  </nav>
+  <div class="main-content">
+    {{> yield}}
+  </div>
+  <hr />
+  <p>Copyright &copy; Our Group, 2022-2022.</p>
 </template>
 
-<template name="info">
-  <h2>Learn Meteor!</h2>
+
+<template name="about">
+  <h2>Made by: </h2>
   <ul>
-    <li><a href="https://www.meteor.com/try" target="_blank">Do the Tutorial</a></li>
-    <li><a href="http://guide.meteor.com" target="_blank">Follow the Guide</a></li>
-    <li><a href="https://docs.meteor.com" target="_blank">Read the Docs</a></li>
-    <li><a href="https://forums.meteor.com" target="_blank">Discussions</a></li>
+    <li>Yoann</li>
+    <li>Benjamin</li>
+    <li>xxxxxx</li>
+    <li>yyyyyy</li>
   </ul>
 </template>
 
@@ -29,11 +35,25 @@
   <h1>Movies List</h1>
   {{#each movie in movies}}
   <div class="movie-container">
-    <h3>{{ movie.title }}</h3>
-    <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}">
+    <div>
+      <a href="/movie/{{movie.id}}">
+        <h3>{{ movie.title }}</h3>
+        <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}">
+      </a>
+    </div>
     <li>{{ movie.overview }}</li>
-    <p>Liké {{ movie.likes }} fois</p>
+    <p class="likes-{{ movie.id }}" data-nblikes="{{ movie.likes }}">Liké <span class="likes">{{ movie.likes }}</span> fois</p>
     <button class="like-button" data-movieId="{{movie.id}}">Liker</button>
   </div>
   {{/each }}
+</template>
+
+<template name="movie">
+  <h1>Movies Details: </h1>
+  <div class="details">
+    <p>{{title}}</p>
+    <img style="max-width: 200px;" src="https://image.tmdb.org/t/p/w500{{ poster_path }}">
+    <p>{{tagline}}</p>
+    <p>In theaters the {{release_date}}</p>
+  </div>
 </template>
