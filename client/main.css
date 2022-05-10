@@ -12,3 +12,12 @@ body {
   background-color: darkgray;
   padding: 15px;
 }
+
+.movie-container {
+  display: flex;
+  align-items: center;
+}
+
+.movie-link img {
+  width: 200px;
+}

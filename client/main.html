@@ -35,15 +35,19 @@
   <h1>Movies List</h1>
   {{#each movie in movies}}
   <div class="movie-container">
-    <div>
+    <div class="movie-link">
       <a href="/movie/{{movie.id}}">
         <h3>{{ movie.title }}</h3>
         <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}">
       </a>
     </div>
-    <li>{{ movie.overview }}</li>
-    <p class="likes-{{ movie.id }}" data-nblikes="{{ movie.likes }}">Liké <span class="likes">{{ movie.likes }}</span> fois</p>
-    <button class="like-button" data-movieId="{{movie.id}}">Liker</button>
+    <div class="movie-info">
+      <p>{{ movie.overview }}</p>
+      <div class="movie-likes">
+        <p class="likes-{{ movie.id }}" data-nblikes="{{ movie.likes }}">Liké <span class="likes">{{ movie.likes }}</span> fois</p>
+        <button class="like-button" data-movieId="{{movie.id}}">Liker</button>
+      </div>
+    </div>
   </div>
   {{/each }}
 </template>

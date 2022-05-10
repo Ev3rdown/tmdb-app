@@ -72,7 +72,7 @@ Template.home.events({
         if (json.success == true){
           var nblikes = (parseInt(document.getElementsByClassName('likes-'+movieId)[0].dataset.nblikes) + 1).toString();
           document.getElementsByClassName('likes-'+movieId)[0].dataset.nblikes = nblikes;
-          document.getElementsByClassName('likes-675353')[0].getElementsByClassName('likes')[0].innerText = nblikes;
+          document.getElementsByClassName('likes-'+movieId)[0].getElementsByClassName('likes')[0].innerText = nblikes;
         }
       })
     });
