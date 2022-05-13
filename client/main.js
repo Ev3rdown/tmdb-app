@@ -19,11 +19,9 @@ Router.route('/movie/:_id', function () {
   var id = params._id; // "5"
   fetch('/api/movies/details/'+id).then(res=>{
     res.json().then(json=>{
-      console.log(json);
       this.render('movie', {
         data: function () {
-          console.log(json.title);
-          console.log("test");
+          console.log(json);
           return json;
         }
       });
@@ -83,4 +81,25 @@ Template.home.helpers({
   movies() {
     return Template.instance().movies.get();
   }
+});
+
+Template.addMovieComment.events({
+  'submit form': function(event){
+    event.preventDefault();
+    form = document.getElementById('addMovieComment');
+    var comment = event.currentTarget.comment.value;
+    fetch('/api/movies/comment/'+form.dataset.movieid,{
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({"comment": comment})
+    })
+    .then(res=>{
+      res.json().then(json=>{
+        console.log(json);
+      });
+    });
+}
 });

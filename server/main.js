@@ -4,7 +4,6 @@ import { Mongo } from 'meteor/mongo'
 import { localDatas } from './local-datas.js'
 import { ClientRequest, ServerResponse } from 'http';
 import SimpleSchema from 'simpl-schema';
-import url from 'url';
 let keysJson = require('.keys.json');
 const MovieDB = require('node-themoviedb');
 
@@ -55,7 +54,7 @@ Router.route('/api/movies/like/:_id', function () {
   res.end(JSON.stringify({success: (up==1?true:false)}));
 }, {where: 'server'});
 
-Router.route('/api/movies/comment/:_id', function () {
+Router.route('/api/movies/comment/:_id', async function () {
   /** @type {ClientRequest} */
   var req = this.request;
   /** @type {ServerResponse} */
@@ -64,13 +63,18 @@ Router.route('/api/movies/comment/:_id', function () {
   var params = this.params;
   var id = parseInt(params._id);
 
-  var commented = moviesComment.insert({movieId: id, content: comment, createdAt: new Date() });
+  var comment = req.body.comment;
+  console.log(comment);
+
+  var commented = moviesComments.update({movieId: id}, {$push:{comments: { content: comment, createdAt: new Date() } }},{ upsert: true });
+  console.log(commented);
+
   res.writeHead(200);
-  res.end(JSON.stringify({success: (commented==1?true:false)}));
-}, {where: 'server'});
+  res.end(JSON.stringify({success: "unknown"/* (commented==1?true:false) */}));
+},{where: 'server'});
 
 
-Router.route('/api/movies/details/:_id', async function () {
+Router.route('/api/movies/details/:_id', async function (request, response) {
   /** @type {ClientRequest} */
   var req = this.request;
   /** @type {ServerResponse} */
@@ -84,6 +88,12 @@ Router.route('/api/movies/details/:_id', async function () {
       movie_id: id,
     },
   });
+  var commentsObj = moviesComments.findOne({ movieId: movie.id });
+  console.log(commentsObj);
+  if(commentsObj) {
+    movie.data.comments = commentsObj.comments;
+    console.log("good")
+  };
 
   res.writeHead(200);
   res.end(JSON.stringify(movie.data));
