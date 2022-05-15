@@ -9,19 +9,13 @@ const MovieDB = require('node-themoviedb');
 
 const mdb = new MovieDB(keysJson.tmdb);
 
-var moviesLikes = new Mongo.Collection('moviesLikes');
-var moviesComments = new Mongo.Collection('moviesComments');
-
-
-/* moviesLikes.schema = new SimpleSchema({
-  movieId: {type: SimpleSchema.Integer, required: true},
-  likes: {type: SimpleSchema.Integer, defaultValue: 0}
-}); */
+var moviesDB = new Mongo.Collection('movies');
 
 Meteor.startup(() => {
   // code to run on server at startup
 });
 
+// Home page
 Router.route('/api/movies/discover', async function () {
   //let moLi = moviesLikes;
   /** @type {ClientRequest} */
@@ -30,9 +24,8 @@ Router.route('/api/movies/discover', async function () {
   var res = this.response;
 
   const movies = await mdb.discover.movie();
-  console.log(movies.data.results);
   movies.data.results.forEach(movie => {
-    var mo = moviesLikes.findOne({ movieId: movie.id });
+    var mo = moviesDB.findOne({ movieId: movie.id, likes: {$gt: 0} });
     movie.likes=0;
     if(mo) movie.likes=mo.likes;
   });
@@ -40,7 +33,7 @@ Router.route('/api/movies/discover', async function () {
   res.end(JSON.stringify(movies.data));
 }, {where: 'server'});
 
-Router.route('/api/movies/like/:_id', function () {
+Router.route('/api/movies/like/add/:_id', function () {
   /** @type {ClientRequest} */
   var req = this.request;
   /** @type {ServerResponse} */
@@ -49,12 +42,13 @@ Router.route('/api/movies/like/:_id', function () {
   var params = this.params;
   var id = parseInt(params._id);
 
-  var up = moviesLikes.update({ movieId: id }, {$inc: { likes: 1 }},{ upsert: true });
+  // upsert is "create or update"
+  var up = moviesDB.update({ movieId: id }, {$inc: { likes: 1 }},{ upsert: true });
   res.writeHead(200);
   res.end(JSON.stringify({success: (up==1?true:false)}));
 }, {where: 'server'});
 
-Router.route('/api/movies/comment/:_id', async function () {
+Router.route('/api/movies/comment/add/:_id', async function () {
   /** @type {ClientRequest} */
   var req = this.request;
   /** @type {ServerResponse} */
@@ -64,16 +58,14 @@ Router.route('/api/movies/comment/:_id', async function () {
   var id = parseInt(params._id);
 
   var comment = req.body.comment;
-  console.log(comment);
 
-  var commented = moviesComments.update({movieId: id}, {$push:{comments: { content: comment, createdAt: new Date() } }},{ upsert: true });
-  console.log(commented);
+  var commented = moviesDB.update({movieId: id}, {$push:{comments: { content: comment, createdAt: new Date() } }},{ upsert: true });
 
   res.writeHead(200);
-  res.end(JSON.stringify({success: "unknown"/* (commented==1?true:false) */}));
+  res.end(JSON.stringify({success: (commented==1?true:false)}));
 },{where: 'server'});
 
-
+// Movie page
 Router.route('/api/movies/details/:_id', async function (request, response) {
   /** @type {ClientRequest} */
   var req = this.request;
@@ -83,21 +75,21 @@ Router.route('/api/movies/details/:_id', async function (request, response) {
   var params = this.params;
   var id = parseInt(params._id);
 
-  const movie = await mdb.movie.getDetails({
+  var movie = await mdb.movie.getDetails({
     pathParameters: {
       movie_id: id,
     },
   });
-  var commentsObj = moviesComments.findOne({ movieId: movie.id });
-  console.log(commentsObj);
+  var commentsObj = moviesDB.findOne({ movieId: id });
   if(commentsObj) {
     movie.data.comments = commentsObj.comments;
-    console.log("good")
   };
 
   res.writeHead(200);
   res.end(JSON.stringify(movie.data));
 }, {where: 'server'});
+
+
 
 //https://github.com/longshotlabs/simpl-schema#required
 //http://iron-meteor.github.io/iron-router/#global-default-options
@@ -107,3 +99,5 @@ Router.route('/api/movies/details/:_id', async function (request, response) {
 //file:///D:/EPSI/Cours%20Services%20Web/web-services-v2.pdf
 
 //http://meteortips.com/second-meteor-tutorial
+//https://forums.meteor.com/t/patterns-and-practices-for-passing-data-between-templates/2951/45
+//https://stackoverflow.com/a/53338056

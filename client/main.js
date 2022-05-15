@@ -15,45 +15,19 @@ Router.route('/', {
 Router.route('/about');
 
 Router.route('/movie/:_id', function () {
-  var params = this.params; // { _id: "5" }
-  var id = params._id; // "5"
-  fetch('/api/movies/details/'+id).then(res=>{
-    res.json().then(json=>{
-      this.render('movie', {
-        data: function () {
-          console.log(json);
-          return json;
-        }
-      });
-    })
-  });
+  // Pass the _id to the template
+  this.state.set('movieId', this.params._id);
+  this.render('movie');
 });
 
-/* Template.hello.onCreated(function helloOnCreated() {
-  // counter starts at 0
-  this.counter = new ReactiveVar(0);
-});
-
-Template.hello.helpers({
-  counter() {
-    return Template.instance().counter.get();
-  },
-});
-
-Template.hello.events({
-  'click button'(event, instance) {
-    // increment the counter when button is clicked
-    instance.counter.set(instance.counter.get() + 1);
-  },
-}); */
+// Template home page
 
 Template.home.onCreated(function homeOnCreated() {
-  let ctrl = this;
+  let that = this;
   this.movies = new ReactiveVar();
   fetch('/api/movies/discover').then(res=>{
     res.json().then(json=>{
-      console.log(json);
-      ctrl.movies.set(json.results);
+      that.movies.set(json.results);
     })
   });
 });
@@ -63,10 +37,8 @@ Template.home.events({
     // increment the counter when button is clicked
     //instance.counter.set(instance.counter.get() + 1);
     let movieId = event.currentTarget.dataset.movieid
-    console.log(movieId);
-    fetch('/api/movies/like/'+movieId).then(res=>{
+    fetch('/api/movies/like/add/'+movieId).then(res=>{
       res.json().then(json=>{
-        console.log(json);
         if (json.success == true){
           var nblikes = (parseInt(document.getElementsByClassName('likes-'+movieId)[0].dataset.nblikes) + 1).toString();
           document.getElementsByClassName('likes-'+movieId)[0].dataset.nblikes = nblikes;
@@ -83,12 +55,37 @@ Template.home.helpers({
   }
 });
 
+// Template Movie
+
+Template.movie.onCreated(function helloOnCreated() {
+  // Get id as set on line 19
+  var id = Iron.controller().state.get('movieId');
+
+  let that = this;
+  this.movie = new ReactiveVar(0);
+
+  fetch('/api/movies/details/'+id).then(res=>{
+    res.json().then(json=>{
+      that.movie.set(json);
+    })
+  });
+});
+
+Template.movie.helpers({
+  movie() {
+    return Template.instance().movie.get();
+  }
+});
+
+// Template comment
+
 Template.addMovieComment.events({
-  'submit form': function(event){
+  'submit form': function(event,instance){
     event.preventDefault();
     form = document.getElementById('addMovieComment');
     var comment = event.currentTarget.comment.value;
-    fetch('/api/movies/comment/'+form.dataset.movieid,{
+    // Forced to use JSON as Iron Router doesn't support FormData format (html standard)
+    fetch('/api/movies/comment/add/'+form.dataset.movieid,{
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -98,8 +95,22 @@ Template.addMovieComment.events({
     })
     .then(res=>{
       res.json().then(json=>{
-        console.log(json);
+        // On sucess, refresh the data to include the newly added comment
+        if (json.success==true) {
+          // Need to specify the instance to use, as movie data is in movie and we are here in addMovieComment
+          movie = Blaze.getView(document.getElementById('movieDetails')).templateInstance().movie.get();
+          fetch('/api/movies/details/'+movie.id).then(res=>{
+            res.json().then(json=>{
+              Blaze.getView(document.getElementById('movieDetails')).templateInstance().movie.set(json);
+            })
+          }).catch((reason)=>{
+            console.log(reason);
+            alert("Error when saving the comment");
+          });
+        }else{
+          alert("Error when saving the comment");
+        }
       });
     });
-}
+  }
 });
